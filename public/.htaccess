@@ -1,0 +1,59 @@
+# /home/pcnrs/realestate/public/.htaccess
+
+# Bez indeksiranja i MultiViews "magije"
+Options -Indexes -MultiViews
+
+# (Opcionalno) dozvoli symlink ako hosting traži
+# Options +SymLinksIfOwnerMatch
+
+AddDefaultCharset utf-8
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Propusti Authorization header do PHP-a (za Sanctum, API, itd.)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Ako traženi fajl/folder postoji (npr. /build/assets/*.css, /storage/...),
+    # posluži ga direktno i ne diraj.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # SVE OSTALO ide na Laravel (public/index.php)
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Keširanje za Vite build (hash-ovani fajlovi su "immutable")
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|mjs|woff2?)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    <FilesMatch "\.(png|jpe?g|gif|svg|webp|ico)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                              "access plus 1 year"
+    ExpiresByType application/javascript               "access plus 1 year"
+    ExpiresByType application/x-javascript             "access plus 1 year"
+    ExpiresByType application/json                     "access plus 1 year"
+    ExpiresByType font/woff                            "access plus 1 year"
+    ExpiresByType font/woff2                           "access plus 1 year"
+    ExpiresByType image/png                            "access plus 1 year"
+    ExpiresByType image/jpeg                           "access plus 1 year"
+    ExpiresByType image/gif                            "access plus 1 year"
+    ExpiresByType image/svg+xml                        "access plus 1 year"
+    ExpiresByType image/webp                           "access plus 1 year"
+</IfModule>
+
+# Zabrani pristup skrivenim fajlovima (osim .well-known)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+<Directory ".well-known">
+    Require all granted
+</Directory>

@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* bitno: preko url() da Vite ne pokušava da ga resolve-uje u buildu */
+@import url("/vendor/filament/filament/resources/css/theme.css");
+
+/* Tailwind v4 izvori za purge */
+@source "../../../views/**/*.blade.php";
+@source "../../../../vendor/filament/**/*.blade.php";
+@source "../../../../vendor/filament/**/*.php";
+@source "../../../../vendor/filament/**/*.js";
+

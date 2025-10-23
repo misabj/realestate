@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+/* Source files */
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* Theme settings */
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* === Modern micro-animations & helpers === */
+
+/* Float animation */
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+/* Blob animation */
+@keyframes blob {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(10px, -20px) scale(1.05); }
+    66% { transform: translate(-15px, 10px) scale(0.97); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+/* Fade-in animation */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Shine animation */
+@keyframes shine {
+    0% { transform: translateX(-120%) rotate(12deg); opacity: 0; }
+    50% { opacity: 0.35; }
+    100% { transform: translateX(120%) rotate(12deg); opacity: 0; }
+}
+
+@keyframes menu-drop {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #mobileMenu:not(.hidden) { animation: menu-drop .18s ease-out both; }
+  
+
+/* === Utility classes === */
+
+/* Glass effect */
+.glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.25)];
+}
+
+/* Reveal on load */
+.reveal {
+    animation: fade-in 0.6s cubic-bezier(0.2, 0.65, 0.3, 1) both;
+}
+.reveal-delay-1 { animation-delay: 0.06s; }
+.reveal-delay-2 { animation-delay: 0.12s; }
+.reveal-delay-3 { animation-delay: 0.18s; }
+
+/* Card hover effect */
+.card {
+    @apply transition-transform duration-300 will-change-transform;
+}
+.card:hover {
+    transform: translateY(-4px);
+}

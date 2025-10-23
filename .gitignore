@@ -1,0 +1,29 @@
+@"
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Node/JS
+node_modules/
+dist/
+.build/
+.cache/
+.npm/
+yarn.lock
+pnpm-lock.yaml
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# PHP
+vendor/
+composer.lock
+
+# Logs
+*.log
+npm-debug.log*
+"@ | Out-File -Encoding utf8 .gitignore
