@@ -27,3 +27,27 @@ composer.lock
 *.log
 npm-debug.log*
 "@ | Out-File -Encoding utf8 .gitignore
+
+# Laravel standard
+/vendor/
+/node_modules/
+/public/hot
+/public/storage
+/storage/*.key
+/storage/app/public
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/testing/
+/storage/framework/views/
+/storage/logs/
+
+# Vite / build artefakti
+/public/build/
+/public/build.zip
+
+
+# IDE / OS
+/.idea/
+/.vscode/
+.DS_Store
+Thumbs.db
