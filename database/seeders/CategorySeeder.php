@@ -13,8 +13,8 @@ class CategorySeeder extends Seeder
         );
 
         Category::firstOrCreate(
-            ['slug' => 'sale'],
-            ['name' => 'Sale', 'type' => 'sale', 'description' => null]
+            ['slug' => 'buy'],
+            ['name' => 'buy', 'type' => 'buy', 'description' => null]
         );
     }
 }

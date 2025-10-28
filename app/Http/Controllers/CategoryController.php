@@ -10,12 +10,12 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        // dve glavne “kategorije” po tipu (rent/sale)
+        // dve glavne “kategorije” po tipu (rent/buy)
         $rentCount = Property::published()->whereHas('category', fn($q)=>$q->where('type','rent'))->count();
-        $saleCount = Property::published()->whereHas('category', fn($q)=>$q->where('type','sale'))->count();
+        $buyCount = Property::published()->whereHas('category', fn($q)=>$q->where('type','buy'))->count();
 
         $categories = Category::query()->orderBy('name')->get();
-        return view('categories.rentCount', compact('rentCount','saleCount'));
+        return view('categories.rentCount', compact('rentCount','buyCount'));
     }
 
     public function show(string $slug)

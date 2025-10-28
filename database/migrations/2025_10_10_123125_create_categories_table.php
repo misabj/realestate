@@ -14,7 +14,7 @@ return new class extends Migration {
                 $table->string('name_sr')->nullable();
                 $table->string('name_ru')->nullable();
                 $table->string('slug')->unique();
-                $table->string('type')->index();      // 'rent' | 'sale'
+                $table->string('type')->index();      // 'rent' | 'buy'
                 $table->text('description')->nullable();      // EN
                 $table->text('description_sr')->nullable();
                 $table->text('description_ru')->nullable();

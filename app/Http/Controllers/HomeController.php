@@ -18,8 +18,8 @@ class HomeController extends Controller
             ->whereHas('category', fn($q) => $q->where('type', 'rent'))
             ->count();
 
-        $saleCount = (clone $base)
-            ->whereHas('category', fn($q) => $q->where('type', 'sale'))
+        $buyCount = (clone $base)
+            ->whereHas('category', fn($q) => $q->where('type', 'buy'))
             ->count();
 
         // najnovije za listu
@@ -36,14 +36,14 @@ class HomeController extends Controller
             ->latest()
             ->first();
 
-        $sale = (clone $base)
-            ->whereHas('category', fn($q) => $q->where('type', 'sale'))
+        $buy = (clone $base)
+            ->whereHas('category', fn($q) => $q->where('type', 'buy'))
             ->whereNotNull('images')
             ->latest()
             ->first();
 
         $rentCover = $rent && is_array($rent->images) && !empty($rent->images) ? $rent->images[0] : null;
-        $saleCover = $sale && is_array($sale->images) && !empty($sale->images) ? $sale->images[0] : null;
+        $buyCover = $buy && is_array($buy->images) && !empty($buy->images) ? $buy->images[0] : null;
 
         $toUrl = function ($path) {
             if (!$path) return null;
@@ -55,9 +55,9 @@ class HomeController extends Controller
         return view('home', [
             'latest'    => $latest,
             'rentCount' => $rentCount,
-            'saleCount' => $saleCount,
+            'buyCount' => $buyCount,
             'rentCover' => $toUrl($rentCover) ?: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1600&auto=format&fit=crop',
-            'saleCover' => $toUrl($saleCover) ?: 'https://images.unsplash.com/photo-1560185008-b033106af2de?q=80&w=1600&auto=format&fit=crop',
+            'buyCover' => $toUrl($buyCover) ?: 'https://images.unsplash.com/photo-1560185008-b033106af2de?q=80&w=1600&auto=format&fit=crop',
         ]);
     }
 }

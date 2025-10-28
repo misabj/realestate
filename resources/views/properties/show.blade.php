@@ -7,239 +7,291 @@
   $images = $property->images ?? [];
   $cover  = $images[0] ?? null;
 
-  // Niz punih URL-ova (storage)
-  $imageUrls = collect($images)
-      ->map(fn($p) => asset('storage/'.$p))
-      ->values()
-      ->all();
+  // puni URL-ovi (storage)
+  $imageUrls = collect($images)->map(fn($p) => asset('storage/'.$p))->values()->all();
+
+  // pomoćne vrednosti
+  $beds   = $property->rooms;          // ako imaš zasebno, zameni
+  $baths  = $property->bathrooms ?? null;
+  $view   = $property->sea_view  ? __('Sea View')
+         : ($property->mountain_view ? __('Mountain View') : null);
 @endphp
 
-<div class="container mx-auto mt-6">
-  {{-- Header --}}
-  <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-    <div>
-      <div class="flex items-center gap-2">
-        @if($property->category?->type)
-          <span class="text-xs px-2 py-1 rounded-full bg-gray-100 border">
-            {{ __($property->category->type === 'rent' ? 'Rent' : 'Sale') }}
+{{-- ============ TOP: FULL-WIDTH SLIDER ============ --}}
+<section class="relative w-full overflow-hidden bg-gray-100">
+  <div id="heroSlider"
+       class="relative h-[48vh] md:h-[56vh] lg:h-[62vh] select-none">
+    {{-- Slides --}}
+    <div id="slidesTrack" class="absolute inset-0 flex transition-transform duration-500 ease-out">
+      @forelse($imageUrls as $url)
+        <div class="shrink-0 w-full h-full relative">
+          <img src="{{ $url }}"
+               alt="{{ $property->title }}"
+               class="w-full h-full object-cover"
+               data-gallery-open="0"> {{-- klik na bilo koju sliku otvara lightbox, index se menja JS-om --}}
+          <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/10"></div>
+        </div>
+      @empty
+        <div class="shrink-0 w-full h-full grid place-items-center text-gray-400">
+          {{ __('No images') }}
+        </div>
+      @endforelse
+    </div>
+
+    {{-- Prev / Next --}}
+    @if(count($imageUrls) > 1)
+      <button id="btnPrev"
+              class="absolute left-3 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full bg-white/80 hover:bg-white shadow">
+        ‹
+      </button>
+      <button id="btnNext"
+              class="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center w-10 h-10 rounded-full bg-white/80 hover:bg-white shadow">
+        ›
+      </button>
+      {{-- dots --}}
+      <div id="dots" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
+        @foreach($imageUrls as $i => $u)
+          <button class="size-2.5 rounded-full bg-white/70 ring-1 ring-black/10 data-[active=true]:bg-white"
+                  data-idx="{{ $i }}"></button>
+        @endforeach
+      </div>
+    @endif
+  </div>
+</section>
+
+{{-- ============ SUMMARY CARD (čist i pregledan) ============ --}}
+<section class="container mx-auto px-4">
+  <div class="mx-auto mb-10 max-w-6xl mt-6 md:mt-10 relative">
+    <article class="rounded-3xl bg-white shadow-xl ring-1 ring-black/5 p-6 md:p-8">
+      {{-- Title + location --}}
+      <header>
+        <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
+          {{ $property->title_localized ?? $property->title }}
+        </h1>
+        <p class="mt-1 text-gray-600">
+          {{ $property->address ?: $property->city }}
+          @if($property->city) · {{ $property->city }} @endif
+          @if($property->country) · {{ $property->country }} @endif
+        </p>
+      </header>
+
+      {{-- Pills row (uvek ista visina, lepo se lome) --}}
+      @php
+        $beds  = $property->rooms;
+        $baths = $property->bathrooms ?? null;
+        $view  = $property->sea_view ? __('Sea View') : ($property->mountain_view ? __('Mountain View') : null);
+      @endphp
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        @if(!is_null($beds))
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18M6 7v10M18 7v10M3 17h18" stroke-width="1.5"/></svg>
+            {{ $beds }} {{ __('Bedrooms') }}
           </span>
         @endif
-        @if($property->city)
-          <span class="text-xs px-2 py-1 rounded-full bg-gray-100 border">
-            {{ $property->city }}
+        @if(!is_null($baths))
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 10h16M7 10v8m10-8v8M5 18h14" stroke-width="1.5"/></svg>
+            {{ $baths }} {{ __('Bathrooms') }}
           </span>
         @endif
+        @if($view)
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" stroke-width="1.5"/><circle cx="12" cy="12" r="3" /></svg>
+            {{ $view }}
+          </span>
+        @endif
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1v22M7 5h6.5a3.5 3.5 0 1 1 0 7H9a3.5 3.5 0 0 0 0 7H17" stroke-width="1.5"/></svg>
+          €{{ number_format($property->price, 0, ',', '.') }}
+        </span>
       </div>
-      <h1 class="text-2xl md:text-3xl font-bold mt-2">
-        {{ $property->title_localized }}
-      </h1>
-      <div class="text-gray-600">{{ $property->address }}</div>
-    </div>
 
-    <div class="text-right">
-      @if(!is_null($property->price))
-        <div class="text-3xl font-semibold">€{{ number_format($property->price,0,',','.') }}</div>
-      @endif
-      <div class="text-gray-600">
-        {{ $property->area }} m²
-        @if(!is_null($property->rooms)) · {{ $property->rooms }} {{ __('Rooms') }} @endif
-        @if(!is_null($property->floor)) · {{ $property->floor }} {{ __('Floor') }} @endif
-      </div>
-    </div>
-  </div>
+      {{-- 2-kolonski raspored: opis + kontakt | ključne stavke --}}
+      <div class="mt-6 grid gap-6 md:grid-cols-3">
+        {{-- Left: description + CTA (2 kolone) --}}
+        <div class="md:col-span-2">
+          @if(filled($property->description_localized ?? $property->description))
+            <p class="text-gray-800 leading-relaxed">
+              {!! nl2br(e($property->description_localized ?? $property->description)) !!}
+            </p>
+          @endif
 
- {{-- Gallery --}}
-<div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-  {{-- Velika slika – klik otvara modal na indexu 0 --}}
-  <div class="md:col-span-2 rounded-2xl overflow-hidden border">
-    <img
-      src="{{ $cover ? asset('storage/'.$cover) : 'https://placehold.co/1200x800' }}"
-      alt="{{ $property->title }}"
-      class="w-full h-[360px] md:h-[520px] object-cover cursor-pointer"
-      data-gallery-open="0"
-    >
-  </div>
-
-  {{-- Thumbnails – svaki otvara modal na svom indexu --}}
-  <div class="grid grid-cols-3 md:grid-cols-1 gap-4">
-    @forelse($images as $i => $img)
-      @continue($i === 0)
-      <img
-        src="{{ asset('storage/'.$img) }}"
-        alt="Image {{ $i+1 }}"
-        class="w-full h-28 md:h-40 object-cover rounded-xl border cursor-pointer"
-        data-gallery-open="{{ $i }}"
-      >
-    @empty
-      <div class="col-span-3 text-gray-500 border rounded-xl p-4 text-center">
-        {{ __('No additional images') }}
-      </div>
-    @endforelse
-  </div>
-</div>
-
-  {{-- Content + Map + Contact --}}
-  <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-6">
-      <section class="rounded-2xl border p-5 bg-white">
-        <h2 class="text-lg font-semibold mb-3">{{ __('Description') }}</h2>
-        <div class="prose max-w-none">
-          {!! nl2br(e($property->description_localized)) !!}
+          <div class="mt-5">
+            <a href="mailto:{{ config('mail.from.address') ?? 'info@example.com' }}?subject={{ rawurlencode($property->title) }}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-slate-800 text-white font-medium hover:bg-slate-900 transition">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6" /></svg>
+              {{ __('Contact') }}
+            </a>
+          </div>
         </div>
-      </section>
 
-      {{-- Mapa (ako ima koordinate) --}}
-      {{-- https://developers.google.com/maps/documentation/embed/get-started --}}
-      {{-- https://www.google.com/maps?q=45.2671,19.8335&z=15&output=embed --}}
+        {{-- Right: key facts (čisto i kompaktno) --}}
+        <aside class="rounded-xl border bg-gray-50 p-4">
+          <h3 class="font-semibold mb-3">{{ __('Key details') }}</h3>
+          <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <dt class="text-gray-600">{{ __('Type') }}</dt>
+            <dd class="font-medium">{{ __($property->category?->type === 'rent' ? 'Rent' : 'Sale') }}</dd>
 
-      @if($property->lat && $property->lng)
-        <section class="rounded-2xl border overflow-hidden">
-          <iframe
-            src="https://maps.google.com/maps?q={{ $property->lat }},{{ $property->lng }}&z=15&output=embed"
-            class="w-full h-80"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            aria-label="{{ __('Map') }}"></iframe>
-        </section>
-      @endif
-    </div>
+            <dt class="text-gray-600">{{ __('Area') }}</dt>
+            <dd class="font-medium">{{ $property->area }} m²</dd>
 
-    <aside class="space-y-6">
-      <div class="rounded-2xl border p-5 bg-white">
-        <h3 class="text-lg font-semibold mb-3">{{ __('Key details') }}</h3>
-        <dl class="grid grid-cols-2 gap-3 text-sm">
-          <dt class="text-gray-600">{{ __('Type') }}</dt>
-          <dd class="font-medium">{{ __($property->category?->type === 'rent' ? 'Rent' : 'Sale') }}</dd>
+            <dt class="text-gray-600">{{ __('Rooms') }}</dt>
+            <dd class="font-medium">{{ $property->rooms ?? '—' }}</dd>
 
-          <dt class="text-gray-600">{{ __('City') }}</dt>
-          <dd class="font-medium">{{ $property->city }}</dd>
+            <dt class="text-gray-600">{{ __('Floor') }}</dt>
+            <dd class="font-medium">{{ $property->floor ?? '—' }}</dd>
 
-          <dt class="text-gray-600">{{ __('Area') }}</dt>
-          <dd class="font-medium">{{ $property->area }} m²</dd>
+            <dt class="text-gray-600">{{ __('City') }}</dt>
+            <dd class="font-medium">{{ $property->city ?? '—' }}</dd>
 
-          <dt class="text-gray-600">{{ __('Rooms') }}</dt>
-          <dd class="font-medium">{{ $property->rooms ?? '—' }}</dd>
-
-          <dt class="text-gray-600">{{ __('Floor') }}</dt>
-          <dd class="font-medium">{{ $property->floor ?? '—' }}</dd>
-
-          <dt class="text-gray-600">{{ __('Address') }}</dt>
-          <dd class="font-medium">{{ $property->address ?? '—' }}</dd>
-
-          <dt class="text-gray-600">{{ __('Price') }}</dt>
-          <dd class="font-medium">€{{ number_format($property->price,0,',','.') }}</dd>
-        </dl>
+            <dt class="text-gray-600">{{ __('Address') }}</dt>
+            <dd class="font-medium truncate" title="{{ $property->address }}">{{ $property->address ?? '—' }}</dd>
+          </dl>
+        </aside>
       </div>
-
-      <div class="rounded-2xl border p-5 bg-white">
-        <h3 class="text-lg font-semibold mb-3">{{ __('Share') }}</h3>
-        <div class="flex gap-2">
-          <a class="px-3 py-1.5 rounded-lg border hover:bg-gray-50"
-             href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(request()->fullUrl()) }}" target="_blank" rel="noopener">Facebook</a>
-          <a class="px-3 py-1.5 rounded-lg border hover:bg-gray-50"
-             href="https://twitter.com/intent/tweet?url={{ urlencode(request()->fullUrl()) }}" target="_blank" rel="noopener">X</a>
-        </div>
-      </div>
-    </aside>
+    </article>
   </div>
-</div>
-{{-- Prosleđujemo slike u JSON za JS (ceo niz, redosled kao u $images) --}}
+</section>
+
+{{-- ============ MAP CARD ============ --}}
+@if($property->lat && $property->lng)
+  <section class="container mx-auto px-4 mt-6">
+    <div class="mx-auto max-w-6xl rounded-3xl overflow-hidden bg-white shadow-xl ring-1 ring-black/5">
+      <div class="px-6 py-4 border-b">
+        <h3 class="font-semibold">{{ __('Location') }}</h3>
+        <p class="text-sm text-gray-600">
+          {{ $property->address ?: $property->city }}
+          @if($property->city) · {{ $property->city }} @endif
+        </p>
+      </div>
+      <iframe
+        src="https://maps.google.com/maps?q={{ $property->lat }},{{ $property->lng }}&z=15&output=embed"
+        class="w-full h-[380px] md:h-[460px]"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        aria-label="{{ __('Map') }}"></iframe>
+    </div>
+  </section>
+@endif
+
+
+{{-- ============ DATA za lightbox ============ --}}
 <script type="application/json" id="property-images-json">
   {!! json_encode($imageUrls, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
 </script>
 
-{{-- Modal galerija --}}
+{{-- ============ LIGHTBOX (ostaje isti) ============ --}}
 <div id="galleryModal" class="fixed inset-0 z-50 hidden items-center justify-center">
   <div class="absolute inset-0 bg-black/70" data-gallery-close></div>
-
   <div class="relative w-[min(95vw,1200px)] h-[82vh] md:h-[86vh] px-4">
     <img id="galleryImage" src="" alt="gallery"
          class="w-full h-full object-contain rounded-lg shadow-lg select-none" />
-
-    {{-- Kontrole --}}
     <button id="galleryPrev"
-            class="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 hover:bg-white shadow">
-      ‹
-    </button>
+            class="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 hover:bg-white shadow">‹</button>
     <button id="galleryNext"
-            class="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 hover:bg-white shadow">
-      ›
-    </button>
+            class="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 hover:bg-white shadow">›</button>
     <button id="galleryClose"
-            class="absolute -right-1 -top-1 p-2 rounded-full bg-white/90 hover:bg-white shadow">
-      ✕
-    </button>
+            class="absolute -right-1 -top-1 p-2 rounded-full bg-white/90 hover:bg-white shadow">✕</button>
   </div>
 </div>
 
+{{-- ============ JS: slider + lightbox ============ --}}
 <script>
 (function () {
+  // --- images dataset for both slider & lightbox ---
   const dataEl = document.getElementById('property-images-json');
   const IMAGES = dataEl ? JSON.parse(dataEl.textContent) : [];
   if (!IMAGES.length) return;
 
+  // ---------- HERO SLIDER ----------
+  const track   = document.getElementById('slidesTrack');
+  const dotsBox = document.getElementById('dots');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+
+  // set correct index on click inside slide (so lightbox kreće od te slike)
+  // svaki slide image dobija svoj data-index
+  Array.from(track.children).forEach((slide, i) => {
+    const img = slide.querySelector('img');
+    if (img) img.setAttribute('data-gallery-open', i);
+  });
+
+  let idx = 0;
+  const slideCount = track.children.length;
+
+  function renderSlider() {
+    track.style.transform = `translateX(${-idx * 100}%)`;
+    if (!dotsBox) return;
+    dotsBox.querySelectorAll('button').forEach((b, i) => {
+      b.dataset.active = (i === idx);
+    });
+  }
+  function next() { idx = (idx + 1) % slideCount; renderSlider(); }
+  function prev() { idx = (idx - 1 + slideCount) % slideCount; renderSlider(); }
+
+  if (btnNext) btnNext.addEventListener('click', next);
+  if (btnPrev) btnPrev.addEventListener('click', prev);
+
+  if (dotsBox) {
+    dotsBox.querySelectorAll('button').forEach((b) => {
+      b.addEventListener('click', () => { idx = +b.dataset.idx; renderSlider(); });
+    });
+  }
+
+  // swipe support
+  let startX = null;
+  track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, {passive:true});
+  track.addEventListener('touchend', (e) => {
+    if (startX == null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) (dx < 0 ? next() : prev());
+    startX = null;
+  });
+
+  renderSlider();
+
+  // ---------- LIGHTBOX ----------
   const modal = document.getElementById('galleryModal');
   const imgEl = document.getElementById('galleryImage');
-  const btnPrev = document.getElementById('galleryPrev');
-  const btnNext = document.getElementById('galleryNext');
-  const btnClose = document.getElementById('galleryClose');
-  const backdropClose = modal.querySelector('[data-gallery-close]');
+  const lbPrev = document.getElementById('galleryPrev');
+  const lbNext = document.getElementById('galleryNext');
+  const lbClose= document.getElementById('galleryClose');
+  const lbBackdrop = modal.querySelector('[data-gallery-close]');
 
-  let index = 0;
-  let touchStartX = null;
+  let lbIndex = 0;
+  function lbShow(i){ lbIndex=(i+IMAGES.length)%IMAGES.length; imgEl.src=IMAGES[lbIndex]; }
+  function lbOpen(i){ lbShow(i); modal.classList.remove('hidden'); modal.classList.add('flex'); document.body.style.overflow='hidden'; }
+  function lbCloseFn(){ modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.style.overflow=''; }
+  function lbNextFn(){ lbShow(lbIndex+1); }
+  function lbPrevFn(){ lbShow(lbIndex-1); }
 
-  function show(i) {
-    index = (i + IMAGES.length) % IMAGES.length;
-    imgEl.src = IMAGES[index];
-  }
-
-  function open(i) {
-    show(i);
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function close() {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.body.style.overflow = '';
-  }
-
-  function next() { show(index + 1); }
-  function prev() { show(index - 1); }
-
-  // Otvaranje sa svih elemenata koji imaju data-gallery-open
-  document.querySelectorAll('[data-gallery-open]').forEach(el => {
+  // openers (any [data-gallery-open] inside slider/card)
+  document.querySelectorAll('[data-gallery-open]').forEach(el=>{
     el.addEventListener('click', () => {
       const i = parseInt(el.getAttribute('data-gallery-open'), 10) || 0;
-      open(i);
+      lbOpen(i);
     });
   });
 
-  // Kontrole
-  btnNext.addEventListener('click', next);
-  btnPrev.addEventListener('click', prev);
-  btnClose.addEventListener('click', close);
-  backdropClose.addEventListener('click', close);
+  lbNext.addEventListener('click', lbNextFn);
+  lbPrev.addEventListener('click', lbPrevFn);
+  lbClose.addEventListener('click', lbCloseFn);
+  lbBackdrop.addEventListener('click', lbCloseFn);
 
-  // Tastatura
   document.addEventListener('keydown', (e) => {
     if (modal.classList.contains('hidden')) return;
-    if (e.key === 'Escape') close();
-    if (e.key === 'ArrowRight') next();
-    if (e.key === 'ArrowLeft') prev();
+    if (e.key === 'Escape') lbCloseFn();
+    if (e.key === 'ArrowRight') lbNextFn();
+    if (e.key === 'ArrowLeft') lbPrevFn();
   });
 
-  // Swipe (mobile)
-  imgEl.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX;
-  }, {passive: true});
-  imgEl.addEventListener('touchend', (e) => {
-    if (touchStartX === null) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(dx) > 40) { dx < 0 ? next() : prev(); }
-    touchStartX = null;
+  imgEl.addEventListener('touchstart', (e)=>{ startX=e.touches[0].clientX; }, {passive:true});
+  imgEl.addEventListener('touchend', (e)=>{
+    if (startX==null) return;
+    const dx=e.changedTouches[0].clientX-startX;
+    if (Math.abs(dx)>40) (dx<0?lbNextFn():lbPrevFn());
+    startX=null;
   });
 })();
 </script>

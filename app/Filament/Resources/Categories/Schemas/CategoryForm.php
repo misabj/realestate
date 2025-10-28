@@ -18,7 +18,7 @@ class CategoryForm
                 TextInput::make('slug')
                     ->required(),
                 Select::make('type')
-                    ->options(['rent' => 'Rent', 'sale' => 'Sale']),
+                    ->options(['rent' => 'Rent', 'buy' => 'buy']),
                 Textarea::make('description')
                     ->columnSpanFull(),
             ]);
