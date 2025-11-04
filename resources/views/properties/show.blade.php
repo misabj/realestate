@@ -17,6 +17,14 @@
          : ($property->mountain_view ? __('Mountain View') : null);
 @endphp
 
+{{-- ===== BACK dugme ===== --}}
+<div class="container mx-auto px-4">
+  <a href="{{ url()->previous() ?: route('properties.index') }}"
+     class="inline-flex items-center gap-2 mt-4 mb-2 px-3 py-1.5 rounded-md ring-1 ring-gray-300 text-gray-700 bg-white hover:bg-gray-50">
+    ← {{ __('Back to results') }}
+  </a>
+</div>
+
 {{-- ============ TOP: FULL-WIDTH SLIDER ============ --}}
 <section class="relative w-full overflow-hidden bg-gray-100">
   <div id="heroSlider"
@@ -28,7 +36,7 @@
           <img src="{{ $url }}"
                alt="{{ $property->title }}"
                class="w-full h-full object-cover"
-               data-gallery-open="0"> {{-- klik na bilo koju sliku otvara lightbox, index se menja JS-om --}}
+               data-gallery-open="0">
           <div class="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/10"></div>
         </div>
       @empty
@@ -59,10 +67,10 @@
   </div>
 </section>
 
-{{-- ============ SUMMARY CARD (čist i pregledan) ============ --}}
+{{-- ============ SUMMARY CARD ============ --}}
 <section class="container mx-auto px-4">
   <div class="mx-auto mb-10 max-w-6xl mt-6 md:mt-10 relative">
-    <article class="rounded-3xl bg-white shadow-xl ring-1 ring-black/5 p-6 md:p-8">
+    <article class="rounded-xl bg-white shadow-xl ring-1 ring-gray-200 p-6 md:p-8">
       {{-- Title + location --}}
       <header>
         <h1 class="text-2xl md:text-3xl font-bold tracking-tight">
@@ -75,7 +83,7 @@
         </p>
       </header>
 
-      {{-- Pills row (uvek ista visina, lepo se lome) --}}
+      {{-- Pills row --}}
       @php
         $beds  = $property->rooms;
         $baths = $property->bathrooms ?? null;
@@ -84,24 +92,24 @@
 
       <div class="mt-4 flex flex-wrap gap-2">
         @if(!is_null($beds))
-          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-sm">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 7h18M6 7v10M18 7v10M3 17h18" stroke-width="1.5"/></svg>
             {{ $beds }} {{ __('Bedrooms') }}
           </span>
         @endif
         @if(!is_null($baths))
-          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-sm">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 10h16M7 10v8m10-8v8M5 18h14" stroke-width="1.5"/></svg>
             {{ $baths }} {{ __('Bathrooms') }}
           </span>
         @endif
         @if($view)
-          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-sm">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" stroke-width="1.5"/><circle cx="12" cy="12" r="3" /></svg>
             {{ $view }}
           </span>
         @endif
-        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-gray-50 text-sm">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-gray-50 text-sm">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1v22M7 5h6.5a3.5 3.5 0 1 1 0 7H9a3.5 3.5 0 0 0 0 7H17" stroke-width="1.5"/></svg>
           €{{ number_format($property->price, 0, ',', '.') }}
         </span>
@@ -109,7 +117,7 @@
 
       {{-- 2-kolonski raspored: opis + kontakt | ključne stavke --}}
       <div class="mt-6 grid gap-6 md:grid-cols-3">
-        {{-- Left: description + CTA (2 kolone) --}}
+        {{-- Left: description + CTA --}}
         <div class="md:col-span-2">
           @if(filled($property->description_localized ?? $property->description))
             <p class="text-gray-800 leading-relaxed">
@@ -119,15 +127,15 @@
 
           <div class="mt-5">
             <a href="mailto:{{ config('mail.from.address') ?? 'info@example.com' }}?subject={{ rawurlencode($property->title) }}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-slate-800 text-white font-medium hover:bg-slate-900 transition">
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white bg-[#264864] hover:brightness-105 transition">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6" /></svg>
               {{ __('Contact') }}
             </a>
           </div>
         </div>
 
-        {{-- Right: key facts (čisto i kompaktno) --}}
-        <aside class="rounded-xl border bg-gray-50 p-4">
+        {{-- Right: key facts --}}
+        <aside class="rounded-lg ring-1 ring-gray-200 bg-gray-50 p-4">
           <h3 class="font-semibold mb-3">{{ __('Key details') }}</h3>
           <dl class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <dt class="text-gray-600">{{ __('Type') }}</dt>
@@ -157,8 +165,8 @@
 {{-- ============ MAP CARD ============ --}}
 @if($property->lat && $property->lng)
   <section class="container mx-auto px-4 mt-6">
-    <div class="mx-auto max-w-6xl rounded-3xl overflow-hidden bg-white shadow-xl ring-1 ring-black/5">
-      <div class="px-6 py-4 border-b">
+    <div class="mx-auto mb-10 max-w-6xl rounded-xl overflow-hidden bg-white shadow-xl ring-1 ring-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="font-semibold">{{ __('Location') }}</h3>
         <p class="text-sm text-gray-600">
           {{ $property->address ?: $property->city }}
@@ -181,7 +189,7 @@
   {!! json_encode($imageUrls, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
 </script>
 
-{{-- ============ LIGHTBOX (ostaje isti) ============ --}}
+{{-- ============ LIGHTBOX ============ --}}
 <div id="galleryModal" class="fixed inset-0 z-50 hidden items-center justify-center">
   <div class="absolute inset-0 bg-black/70" data-gallery-close></div>
   <div class="relative w-[min(95vw,1200px)] h-[82vh] md:h-[86vh] px-4">
@@ -199,7 +207,6 @@
 {{-- ============ JS: slider + lightbox ============ --}}
 <script>
 (function () {
-  // --- images dataset for both slider & lightbox ---
   const dataEl = document.getElementById('property-images-json');
   const IMAGES = dataEl ? JSON.parse(dataEl.textContent) : [];
   if (!IMAGES.length) return;
@@ -210,8 +217,6 @@
   const btnPrev = document.getElementById('btnPrev');
   const btnNext = document.getElementById('btnNext');
 
-  // set correct index on click inside slide (so lightbox kreće od te slike)
-  // svaki slide image dobija svoj data-index
   Array.from(track.children).forEach((slide, i) => {
     const img = slide.querySelector('img');
     if (img) img.setAttribute('data-gallery-open', i);
@@ -266,7 +271,6 @@
   function lbNextFn(){ lbShow(lbIndex+1); }
   function lbPrevFn(){ lbShow(lbIndex-1); }
 
-  // openers (any [data-gallery-open] inside slider/card)
   document.querySelectorAll('[data-gallery-open]').forEach(el=>{
     el.addEventListener('click', () => {
       const i = parseInt(el.getAttribute('data-gallery-open'), 10) || 0;
