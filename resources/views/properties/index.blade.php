@@ -106,7 +106,7 @@
               <option value="newest" @selected(request('sort')==='newest' || !request()->has('sort'))>{{ __('Newest') }}</option>
               <option value="price_asc" @selected(request('sort')==='price_asc')>{{ __('Price ↑') }}</option>
               <option value="price_desc" @selected(request('sort')==='price_desc')>{{ __('Price ↓') }}</option>
-              <option value="area_desc" @selected(request('sort')==='area_desc')>{{ __('Area ↓') }}</option>
+              {{-- <option value="area_desc" @selected(request('sort')==='area_desc')>{{ __('Area ↓') }}</option> --}}
             </select>
           </div>
 
