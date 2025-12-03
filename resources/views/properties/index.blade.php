@@ -188,60 +188,88 @@
             @endforeach
           </div>
 
-          {{-- ==================== BANNERS BOTTOM ==================== --}}
+         {{-- ==================== BANNERS BOTTOM ==================== --}}
           @php
-              $b1 = file_exists(public_path('storage/properties/baner1.jpg'))
-                  ? asset('storage/properties/baner1.jpg')
+              /** @var \Illuminate\Support\Collection|\App\Models\Banner[]|null $bottomBanners */
+
+              // ako iz nekog razloga nije prosleđeno iz kontrolera, da ne puca
+              $bottomBanners = $bottomBanners ?? collect();
+
+              $banner1 = $bottomBanners->get('bottom1');
+              $banner2 = $bottomBanners->get('bottom2');
+              $banner3 = $bottomBanners->get('bottom3');
+
+              // IMAGE URL-ovi (iz model accessor-a image_url) + fallback na Unsplash
+              $b1 = $banner1?->image
+                  ? asset('storage/' . $banner1->image)
                   : 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?q=80&w=1600&auto=format&fit=crop';
-              $b2 = file_exists(public_path('storage/properties/baner2.jpg'))
-                  ? asset('storage/properties/baner2.jpg')
+
+              $b2 = $banner2?->image
+                  ? asset('storage/' . $banner2->image)
                   : 'https://images.unsplash.com/photo-1494526585095-c41746248156?q=80&w=1600&auto=format&fit=crop';
-              $b3 = file_exists(public_path('storage/properties/baner3.jpg'))
-                  ? asset('storage/properties/baner3.jpg')
+
+              $b3 = $banner3?->image
+                  ? asset('storage/' . $banner3->image)
                   : 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?q=80&w=1600&auto=format&fit=crop';
+
+              // LINKOVI – ako u bazi imaš "link", koristi njega, inače default kao do sad
+              $b1Link = $banner1?->link ?: route('properties.index', ['type' => 'sale']);
+              $b2Link = $banner2?->link ?: route('properties.index', ['type' => 'rent']);
+              $b3Link = $banner3?->link ?: route('properties.index');
+
+              // TITLOVI – ako si u Filamentu postavio title, koristi njega, inače default tekst
+              $b1Title = $banner1?->title ?? __('Featured: Porto Montenegro Exclusive Offers');
+              $b2Title = $banner2?->title ?? __('New Listings: Seafront Apartments');
+              $b3Title = $banner3?->title ?? __('Subscribe for Luxury Offers & Updates');
           @endphp
 
           <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
             {{-- Banner 1 --}}
-            <a href="{{ route('properties.index', ['type' => 'sale']) }}"
-               class="block relative rounded-lg overflow-hidden group ring-1 ring-gray-200 bg-center bg-cover
+            <a href="{{ $b1Link }}"
+              class="block relative rounded-lg overflow-hidden group ring-1 ring-gray-200 bg-center bg-cover
                       aspect-[16/9] md:aspect-[3/1]
                       shadow-[0_8px_20px_rgba(0,0,0,0.07)]
                       hover:shadow-[0_10px_24px_rgba(0,0,0,0.09)] transition">
               <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition"></div>
               <div class="absolute bottom-4 left-4 right-4 p-2 text-white text-xl font-semibold drop-shadow-md"
-                   style="text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 2px rgba(0,0,0,.5)">
-                {{ __('Featured: Porto Montenegro Exclusive Offers') }}
+                  style="text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 2px rgba(0,0,0,.5)">
+                {{ $b1Title }}
               </div>
-              <span aria-hidden="true" class="absolute inset-0 bg-center bg-cover" style="background-image:url('{{ $b1 }}')"></span>
+              <span aria-hidden="true"
+                    class="absolute inset-0 bg-center bg-cover"
+                    style="background-image:url('{{ $b1 }}')"></span>
             </a>
 
             {{-- Banner 2 --}}
-            <a href="{{ route('properties.index', ['type' => 'rent']) }}"
-               class="block relative rounded-lg overflow-hidden group ring-1 ring-gray-200 bg-center bg-cover
+            <a href="{{ $b2Link }}"
+              class="block relative rounded-lg overflow-hidden group ring-1 ring-gray-200 bg-center bg-cover
                       aspect-[16/9] md:aspect-[3/1]
                       shadow-[0_8px_20px_rgba(0,0,0,0.07)]
                       hover:shadow-[0_10px_24px_rgba(0,0,0,0.09)] transition">
               <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition"></div>
               <div class="absolute bottom-4 left-4 right-4 p-2 text-white text-xl font-semibold drop-shadow-md"
-                   style="text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 2px rgba(0,0,0,.5)">
-                {{ __('New Listings: Seafront Apartments') }}
+                  style="text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 2px rgba(0,0,0,.5)">
+                {{ $b2Title }}
               </div>
-              <span aria-hidden="true" class="absolute inset-0 bg-center bg-cover" style="background-image:url('{{ $b2 }}')"></span>
+              <span aria-hidden="true"
+                    class="absolute inset-0 bg-center bg-cover"
+                    style="background-image:url('{{ $b2 }}')"></span>
             </a>
 
             {{-- Banner 3 --}}
-            <a href="{{ route('properties.index') }}"
-               class="block relative rounded-lg overflow-hidden group ring-1 ring-gray-200 bg-center bg-cover
+            <a href="{{ $b3Link }}"
+              class="block relative rounded-lg overflow-hidden group ring-1 ring-gray-200 bg-center bg-cover
                       aspect-[16/9] md:aspect-[3/1]
                       shadow-[0_8px_20px_rgba(0,0,0,0.07)]
                       hover:shadow-[0_10px_24px_rgba(0,0,0,0.09)] transition">
               <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition"></div>
               <div class="absolute bottom-4 left-4 right-4 p-2 text-white text-xl font-semibold drop-shadow-md"
-                   style="text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 2px rgba(0,0,0,.5)">
-                {{ __('Subscribe for Luxury Offers & Updates') }}
+                  style="text-shadow:0 2px 8px rgba(0,0,0,.7), 0 0 2px rgba(0,0,0,.5)">
+                {{ $b3Title }}
               </div>
-              <span aria-hidden="true" class="absolute inset-0 bg-center bg-cover" style="background-image:url('{{ $b3 }}')"></span>
+              <span aria-hidden="true"
+                    class="absolute inset-0 bg-center bg-cover"
+                    style="background-image:url('{{ $b3 }}')"></span>
             </a>
           </div>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Property;
+use App\Models\Banner; // 👈 dodato
 use Illuminate\Http\Request;
 
 class PropertyController extends Controller
@@ -14,7 +15,7 @@ class PropertyController extends Controller
             ->where('is_published', true);
 
         if ($type = $request->string('type')->trim()->value()) {
-            $q->whereHas('category', fn($c) => $c->where('type', $type));
+            $q->whereHas('category', fn ($c) => $c->where('type', $type));
         }
 
         if ($kw = $request->string('q')->trim()->lower()->value()) {
@@ -22,9 +23,9 @@ class PropertyController extends Controller
                 'belgrade' => 'beograd',
                 'beograd'  => 'beograd',
                 'novi sad' => 'novi sad',
-                'nis' => 'niš',
-                'niš' => 'niš',
-                'niš' => 'niš',
+                'nis'      => 'niš',
+                'niš'      => 'niš',
+                'niš'     => 'niš',
             ];
             $needle = $normalize[$kw] ?? $kw;
 
@@ -34,12 +35,29 @@ class PropertyController extends Controller
             });
         }
 
-        if ($min = $request->integer('min_price')) $q->where('price', '>=', $min);
-        if ($max = $request->integer('max_price')) $q->where('price', '<=', $max);
-        if ($roomsMin = $request->integer('rooms_min')) $q->where('rooms', '>=', $roomsMin);
-        if ($roomsMax = $request->integer('rooms_max')) $q->where('rooms', '<=', $roomsMax);
-        if ($areaMin = $request->integer('area_min')) $q->where('area', '>=', $areaMin);
-        if ($areaMax = $request->integer('area_max')) $q->where('area', '<=', $areaMax);
+        if ($min = $request->integer('min_price')) {
+            $q->where('price', '>=', $min);
+        }
+
+        if ($max = $request->integer('max_price')) {
+            $q->where('price', '<=', $max);
+        }
+
+        if ($roomsMin = $request->integer('rooms_min')) {
+            $q->where('rooms', '>=', $roomsMin);
+        }
+
+        if ($roomsMax = $request->integer('rooms_max')) {
+            $q->where('rooms', '<=', $roomsMax);
+        }
+
+        if ($areaMin = $request->integer('area_min')) {
+            $q->where('area', '>=', $areaMin);
+        }
+
+        if ($areaMax = $request->integer('area_max')) {
+            $q->where('area', '<=', $areaMax);
+        }
 
         match ($request->string('sort')->value()) {
             'price_asc'  => $q->orderBy('price', 'asc'),
@@ -50,8 +68,16 @@ class PropertyController extends Controller
 
         $properties = $q->paginate(12)->withQueryString();
 
-        return view('properties.index', compact('properties'));
+        // 🔽 BANERI: bottom1, bottom2, bottom3
+        $bottomBanners = Banner::query()
+            ->whereIn('key', ['bottom1', 'bottom2', 'bottom3'])
+            ->where('active', true)
+            ->get()
+            ->keyBy('key');
+
+        return view('properties.index', compact('properties', 'bottomBanners'));
     }
+
     public function show(string $slug)
     {
         $property = Property::query()
