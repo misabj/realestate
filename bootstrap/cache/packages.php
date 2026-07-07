@@ -55,6 +55,13 @@
       0 => 'Filament\\Notifications\\NotificationsServiceProvider',
     ),
   ),
+  'filament/query-builder' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Filament\\QueryBuilder\\QueryBuilderServiceProvider',
+    ),
+  ),
   'filament/schemas' => 
   array (
     'providers' => 
@@ -176,13 +183,6 @@
     'providers' => 
     array (
       0 => 'OpenAI\\Laravel\\ServiceProvider',
-    ),
-  ),
-  'phiki/phiki' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     ),
   ),
   'ryangjchandler/blade-capture-directive' => 
